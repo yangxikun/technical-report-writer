@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{REPORT_TITLE}}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
+  <style>
+    :root {
+      --ink: #091540;
+      --primary: #1055C9;
+      --accent: #7692FF;
+      --line: #ABD2FA;
+      --paper: #FFFFFF;
+      --code-bg: #f6f8fa;
+      --code-ink: #24292f;
+      --code-line: #d0d7de;
+      --radius: 7px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+    a { color: var(--primary); text-underline-offset: 2px; }
+    .shell { max-width: 1260px; margin: 0 auto; padding: 0 28px 60px; }
+    header {
+      margin: 0 -28px;
+      padding: 52px max(28px, calc((100vw - 1204px) / 2)) 43px;
+      background: var(--ink);
+      color: var(--paper);
+      border-bottom: 5px solid var(--accent);
+    }
+    .eyebrow { margin: 0 0 10px; color: var(--line); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+    h1 { margin: 0; font-size: 34px; line-height: 1.18; letter-spacing: 0; }
+    .subtitle { max-width: 850px; margin: 14px 0 0; color: var(--line); font-size: 17px; }
+    .meta { margin: 18px 0 0; color: var(--line); font-size: 13px; }
+    .toc-wrap { margin-top: 24px; padding-top: 13px; border-top: 1px solid var(--accent); }
+    .toc-label { color: var(--line); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+    .toc { display: grid; gap: 10px; margin-top: 8px; }
+    .toc-group { display: grid; gap: 4px; }
+    .toc a { color: var(--paper); text-decoration: none; }
+    .toc-primary { font-size: 14px; font-weight: 700; }
+    .toc-sub { padding-left: 12px; color: var(--line) !important; font-size: 12px; }
+    main { padding-top: 28px; }
+    section { margin-top: 40px; }
+    .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 17px; }
+    .section-no { color: var(--accent); font-size: 13px; font-weight: 800; }
+    h2 { margin: 0; color: var(--primary); font-size: 24px; line-height: 1.3; }
+    h3 { margin: 25px 0 10px; color: var(--primary); font-size: 17px; line-height: 1.45; }
+    p { margin: 9px 0; }
+    .lead { max-width: 960px; font-size: 16px; }
+    .scenario, .callout, .decision {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--paper);
+    }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stack { grid-template-columns: 1fr; }
+    .card {
+      min-width: 0;
+      padding: 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 2px var(--line);
+    }
+    .card h3 { margin-top: 0; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    table { width: 100%; min-width: 820px; border-collapse: collapse; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { border-bottom: 2px solid var(--accent); color: var(--ink); }
+    tr:last-child td { border-bottom: 0; }
+    code { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); color: var(--ink); }
+    pre { margin: 12px 0 0; padding: 0; overflow-x: auto; border: 1px solid var(--code-line); border-radius: 6px; background: var(--code-bg); color: var(--code-ink); }
+    pre code, pre code.hljs { display: block; padding: 16px 18px; background: var(--code-bg); color: var(--code-ink); font-size: 12.5px; line-height: 1.68; tab-size: 2; }
+    footer { margin-top: 45px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; }
+    @media (max-width: 850px) {
+      .shell { padding: 0 16px 42px; }
+      header { margin: 0 -16px; padding: 36px 16px 31px; }
+      h1 { font-size: 28px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      section { margin-top: 31px; }
+    }
+    @media (min-width: 1100px) {
+      header .shell, main.shell { padding-right: 302px; }
+      .toc-wrap {
+        position: fixed;
+        top: 50%;
+        right: 24px;
+        z-index: 10;
+        width: 240px;
+        max-height: calc(100vh - 48px);
+        margin: 0;
+        padding: 14px 15px;
+        overflow-y: auto;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        background: var(--ink);
+        box-shadow: 0 8px 24px var(--line);
+        transform: translateY(-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">TECHNICAL DECISION REPORT</p>
+      <h1>{{REPORT_TITLE}}</h1>
+      <p class="subtitle">{{REPORT_SUBTITLE}}</p>
+      <p class="meta">{{SOURCE_SUMMARY}} · {{RESEARCH_DATE}} · {{SCOPE_NOTE}}</p>
+      <div class="toc-wrap">
+        <div class="toc-label">目录</div>
+        <nav class="toc" aria-label="报告目录">
+          <div class="toc-group">
+            <a class="toc-primary" href="#summary">01 {{SUMMARY_HEADING}}</a>
+          </div>
+          <div class="toc-group">
+            <a class="toc-primary" href="#model">02 {{MODEL_HEADING}}</a>
+            <a class="toc-sub" href="#model-boundary">{{MODEL_SUBHEADING}}</a>
+          </div>
+          <div class="toc-group">
+            <a class="toc-primary" href="#evidence">03 {{EVIDENCE_HEADING}}</a>
+          </div>
+          <div class="toc-group">
+            <a class="toc-primary" href="#sources">04 {{SOURCES_HEADING}}</a>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="summary">
+      <div class="section-head"><span class="section-no">01</span><h2>{{SUMMARY_HEADING}}</h2></div>
+      <div class="scenario"><strong>{{SCENARIO_LABEL}}：</strong>{{SCENARIO_TEXT}}</div>
+      <p class="lead">{{EXECUTIVE_SUMMARY}}</p>
+      <div class="grid grid-3">
+        <article class="card"><h3>{{OPTION_A}}</h3><p>{{OPTION_A_WHEN}}</p><p>{{OPTION_A_TRADEOFF}}</p></article>
+        <article class="card"><h3>{{OPTION_B}}</h3><p>{{OPTION_B_WHEN}}</p><p>{{OPTION_B_TRADEOFF}}</p></article>
+        <article class="card"><h3>{{OPTION_C}}</h3><p>{{OPTION_C_WHEN}}</p><p>{{OPTION_C_TRADEOFF}}</p></article>
+      </div>
+      <div class="decision"><strong>{{DECISION_LABEL}}：</strong>{{DECISION_TEXT}}</div>
+    </section>
+
+    <section id="model">
+      <div class="section-head"><span class="section-no">02</span><h2>{{MODEL_HEADING}}</h2></div>
+      <p class="lead">{{MODEL_INTRODUCTION}}</p>
+      <h3 id="model-boundary">{{MODEL_SUBHEADING}}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>{{DIMENSION}}</th><th>{{OPTION_A}}</th><th>{{OPTION_B}}</th><th>{{OPTION_C}}</th></tr></thead>
+          <tbody>
+            <tr><td>{{ROW_LABEL}}</td><td>{{A_VALUE}}</td><td>{{B_VALUE}}</td><td>{{C_VALUE}}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="section-head"><span class="section-no">03</span><h2>{{EVIDENCE_HEADING}}</h2></div>
+      <p class="lead">{{EVIDENCE_INTRODUCTION}}</p>
+      <div class="grid stack">
+        <article class="card">
+          <h3>{{EXAMPLE_HEADING}}</h3>
+          <pre><code class="language-json">{{JSON_EXAMPLE}}</code></pre>
+          <p>{{EXAMPLE_INTERPRETATION}}</p>
+        </article>
+      </div>
+      <div class="callout"><strong>{{PRINCIPLE_LABEL}}：</strong>{{PRINCIPLE_TEXT}}</div>
+    </section>
+
+    <section id="sources">
+      <div class="section-head"><span class="section-no">04</span><h2>{{SOURCES_HEADING}}</h2></div>
+      <ul>
+        <li><a href="{{SOURCE_URL}}">{{SOURCE_TITLE}}</a>：{{SOURCE_NOTE}}</li>
+      </ul>
+    </section>
+
+    <footer>{{FOOTER_NOTE}}</footer>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</body>
+</html>
