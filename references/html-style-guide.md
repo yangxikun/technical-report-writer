@@ -38,6 +38,10 @@ Do not use `#ABD2FA` as a large-area content background. It should remain a weak
 
 ## Components
 
+### Technical Figures
+
+Use a full-width SVG figure for architecture, data-flow, workflow, sequence, or state diagrams. Generate the SVG with `fireworks-tech-graph` when that skill is available. Use a white background, thin pale-blue border, responsive image width, concise caption, and descriptive alt text. Read [diagram-guide.md](diagram-guide.md) before generating or embedding a technical figure.
+
 ### Cards
 
 Use cards only for genuinely parallel alternatives or repeated items. White background, thin pale-blue border, radius no greater than 8px. Do not put cards inside cards.
@@ -83,6 +87,7 @@ Verify at minimum:
 - mobile width where cards stack and code scrolls horizontally;
 - no text overlaps, clipped headings, or content hidden under the TOC;
 - long TOC labels wrap cleanly and remain clickable.
+- diagram labels remain readable and no connectors or nodes are clipped.
 
 ## Structural Validation
 
@@ -93,3 +98,4 @@ Before delivery:
 - verify each linked heading matches its TOC label;
 - confirm external theme URLs and source links;
 - render the page and visually inspect the first viewport plus at least one dense example section.
+- inspect every SVG diagram at desktop and mobile widths, confirm its asset path resolves, and verify its `viewBox`, labels, and connectors are not clipped.

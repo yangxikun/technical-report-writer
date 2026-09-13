@@ -32,6 +32,7 @@ These preferences were confirmed through iterative edits. Apply them when produc
 - Support secondary TOC entries for meaningful subsections.
 - TOC text must match destination headings exactly.
 - Keep the document focused. Remove chapters that do not help the requested decision.
+- Proactively include architecture, data-flow, workflow, sequence, or state diagrams when they explain relationships better than prose. Prefer the `fireworks-tech-graph` skill and use it to generate SVG diagrams when it is available; do not block delivery when it is not.
 
 ## Visual Style
 
@@ -41,6 +42,7 @@ These preferences were confirmed through iterative edits. Apply them when produc
 - Prefer white cards, callouts, and table headers with blue border accents.
 - Use Highlight.js `github` light theme for code blocks, including its GitHub-like light background.
 - Keep long examples full-width; avoid squeezing three code samples into one row.
+- Keep technical SVG diagrams full-width, readable, captioned, and consistent with the report's blue palette.
 
 ## Interaction Pattern
 

@@ -85,7 +85,18 @@ For API comparisons:
 
 Use SDK code only when the task is implementation-language-specific or the user asks for runnable code.
 
-## 7. Make Trade-offs Concrete
+## 7. Use Diagrams For Relationships
+
+When a report explains architecture, data movement, workflow, lifecycle, or responsibility boundaries, use an appropriate technical diagram before adding more prose. The figure should answer one explicit question and use the same vocabulary as the text.
+
+- Architecture diagrams explain structure and ownership.
+- Data-flow diagrams explain movement, transformation, storage, and trust boundaries.
+- Workflow or sequence diagrams explain ordering, branches, retries, and actor interactions.
+- State diagrams explain lifecycle and valid transitions.
+
+Read [diagram-guide.md](diagram-guide.md) for tool routing, construction rules, and verification. Do not add a diagram when a compact table or three sentences communicate the same idea more clearly.
+
+## 8. Make Trade-offs Concrete
 
 Trade-offs should name who gains and who pays.
 
@@ -97,7 +108,7 @@ Better:
 
 > The platform can preserve tool and reasoning context, reducing application-side transcript assembly. In exchange, the consumer must handle a typed output array and event state machine instead of assuming one assistant message.
 
-## 8. End With Transferable Principles
+## 9. End With Transferable Principles
 
 Use two to four principles when they genuinely summarize the report. Good principles are conditional and operational.
 
@@ -108,7 +119,7 @@ Examples:
 - Platform-managed state reduces orchestration work; it does not replace audit history.
 - Treat tool calls as identity-bearing round trips.
 
-## 9. Edit For Precision
+## 10. Edit For Precision
 
 During revision:
 
@@ -120,7 +131,7 @@ During revision:
 - keep paragraphs focused on one claim;
 - remove a section if the reader can still make the decision without it.
 
-## 10. Avoid These Failure Modes
+## 11. Avoid These Failure Modes
 
 - Documentation transcription without synthesis.
 - Feature matrices that omit responsibility and trade-offs.
@@ -130,3 +141,4 @@ During revision:
 - “Supports X” without explaining whether the platform or application executes X.
 - Treating caching, storage, and conversation state as the same concept.
 - Treating protocol design as proof of model quality.
+- Decorative diagrams, unlabeled arrows, or figures that contradict the prose.
