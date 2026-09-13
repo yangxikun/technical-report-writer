@@ -46,7 +46,7 @@
     .toc-group { display: grid; gap: 4px; }
     .toc a { color: var(--paper); text-decoration: none; }
     .toc-primary { font-size: 14px; font-weight: 700; }
-    .toc-sub { padding-left: 12px; color: var(--line) !important; font-size: 12px; }
+    .toc-sub { padding-left: 12px; font-size: 12px; }
     main { padding-top: 28px; }
     section { margin-top: 40px; }
     .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 17px; }
@@ -58,11 +58,17 @@
     .scenario, .callout, .decision {
       margin: 18px 0;
       padding: 16px 18px;
-      border: 1px solid var(--line);
+      border: 1px solid #D6E4F8;
       border-left: 4px solid var(--accent);
       border-radius: var(--radius);
-      background: var(--paper);
+      background: #F5F9FF;
     }
+    .callout.warn {
+      background: #FFF7E4;
+      border-color: #EFD9A7;
+      border-left-color: #D48806;
+    }
+    .callout.warn .label, .callout.warn strong { color: #9A6200; }
     .grid { display: grid; gap: 16px; }
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -109,10 +115,13 @@
         overflow-y: auto;
         border: 1px solid var(--accent);
         border-radius: 6px;
-        background: var(--ink);
+        background: var(--paper);
         box-shadow: 0 8px 24px var(--line);
         transform: translateY(-50%);
       }
+      .toc-wrap .toc-label { color: var(--ink); }
+      .toc-wrap .toc a { color: var(--ink); }
+      /* Secondary TOC entries keep the same color as primary; hierarchy is conveyed by indentation and font size only. */
     }
   </style>
 </head>
