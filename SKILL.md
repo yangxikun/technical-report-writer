@@ -35,12 +35,23 @@ Create a report that helps the reader make and implement a technical decision. D
 6. Prefer one scenario carried through the report over unrelated examples. Use a second example only when it reveals a genuinely different boundary.
 7. End important sections with a reusable principle, decision rule, or warning. Avoid slogans unsupported by the section.
 8. Self-validate: run the mechanical validation script from [references/html-style-guide.md](references/html-style-guide.md) (tag balance, anchor resolution, JSON parse, code-block whitespace, SVG marker references) and fix what it catches.
-9. Run the review pass described below, triage the findings, and fix what matters.
+9. Run the review pass described below — including **one forked reviewer subagent per SVG diagram** — triage the findings, and fix what matters.
 10. Deliver: link the artifact and state what changed. If the report lives in a remote page node, re-import to the same node so the link stays stable.
 
 ## Review Pass
 
-Self-review is unreliable on your own output — you read what you intended to write, not what is on the page. Delegate the check to a **read-only reviewer subagent** before delivery.
+Self-review is unreliable on your own output — you read what you intended to write, not what is on the page. Delegate the check to **read-only reviewer subagents** before delivery.
+
+### Per-Diagram Review (mandatory, one subagent per SVG)
+
+Every generated SVG diagram gets its own forked review subagent. Diagram defects are geometric (text overlapping shapes, labels clipped at the viewBox edge, arrowheads in the wrong color) and a whole-report reviewer skimming prose reliably misses them — a dedicated reviewer with a narrow scope does not.
+
+- Fork one `Explore`-type subagent **per diagram**, all in parallel, after the diagram is embedded and the mechanical script passes. Do not batch multiple diagrams into one reviewer, and do not fold diagram review into the whole-report pass.
+- Scope each reviewer to exactly one SVG: give the file path, the line range of the `<figure>`, the named question the diagram answers, the legend and color semantics, and which choices were explicitly requested. Use the per-diagram brief template in [references/review-checklist.md](references/review-checklist.md).
+- The reviewer must compute geometry, not eyeball it: estimate every `<text>` width (CJK chars × font-size + latin chars × 0.55 × font-size), map each span against the bounds of every nearby `rect` / `line` / `text`, and check nothing exceeds the viewBox.
+- This applies equally when a later revision touches a diagram — re-review that diagram with a fresh subagent, even if the rest of the report needs no review pass.
+
+### Whole-Report Review
 
 - Spawn an `Explore`-type subagent. Read-only is deliberate: the reviewer cannot accidentally edit, so you keep ownership of every change.
 - Give it a self-contained brief — it has not seen the conversation. State the file path, the standards files to apply, what changed this round, and which choices were explicitly requested by the user and must not be flagged. Use the brief template in [references/review-checklist.md](references/review-checklist.md).
@@ -48,7 +59,7 @@ Self-review is unreliable on your own output — you read what you intended to w
 - Triage before acting. Fix every BLOCKER; fix SHOULD-FIX unless it contradicts an explicit user instruction; apply NITPICK only when free. When a finding conflicts with something the user asked for, keep the user's choice and say so at delivery.
 - Re-run the mechanical script after fixing. A second review pass is warranted only for structural fixes, not typos.
 
-Skip the subagent for a single-word fix or a change the user is watching in real time; still run the mechanical script, which costs seconds.
+Skip the whole-report subagent for a single-word fix or a change the user is watching in real time; still run the mechanical script, which costs seconds. The per-diagram subagent is skippable only when the change provably does not touch any SVG.
 
 Revisions deserve the same scrutiny as first drafts. Most defects in a mature report are regressions from editing — stale chapter numbers after a deletion, a stranded duplicate paragraph after a block replacement, a style rule applied to one instance out of nine, a formatter run twice over the same block.
 
@@ -93,6 +104,6 @@ The report is complete when a reader can answer:
 And mechanically:
 
 - Does the validation script pass — tags balanced, anchors resolving, every JSON block parsing, no stray whitespace rows in code blocks, every arrowhead marker defined?
-- Did a reviewer subagent see the changed regions, and was every BLOCKER resolved?
+- Did a reviewer subagent see the changed regions, was every BLOCKER resolved — and did each SVG diagram get its own forked review subagent with computed (not eyeballed) geometry?
 
 If the report only restates documentation or lists features, revise it before delivery.

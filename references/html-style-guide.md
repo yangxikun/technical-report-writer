@@ -35,10 +35,10 @@ Rules: one meaning per color across the whole report; colored SVG arrows need ma
 
 ## Layout
 
-- Main content is a constrained, centered column on white.
-- The title band may use deep navy with white title text and pale-blue secondary text.
-- On wide screens, reserve space for a fixed right-side TOC. Center it vertically and constrain height with internal scrolling.
-- **Compute the fixed-TOC breakpoint, do not guess it.** With a centered column of `max-width: W` and a TOC at `position: fixed; right: R; width: T`, the content's right edge is `V/2 + W/2` and the TOC's left edge is `V - R - T`. Overlap disappears only when `V > W + 2R + 2T`. For `W=860, R=24, T=230` that is about 1400px — so a `min-width: 1280px` media query silently hides tables and code blocks under the TOC. Add margin and round up (1440px), or narrow the TOC.
+- Main content column width is 75% of the viewport (`.shell { width: 75% }`) on white — this user's established choice, replacing fixed pixel max-widths. Do not add `max-width` caps to prose blocks (`.subtitle`, `.lead`), which would silently defeat the 75% directive. On narrow screens (≤850px) fall back to full width (`width: auto`).
+- The title band may use deep navy with white title text and pale-blue secondary text; keep it full-width with the inner shell controlling text alignment (no negative-margin tricks).
+- On wide screens, keep a fixed right-side TOC (`position: fixed; right: 24px; width: 240px`), vertically centered with height constrained by internal scrolling. Because a centered 75% column leaves only 12.5vw per side — colliding with the TOC below ~2100px viewport width — **left-align the content column on wide screens** (`margin-left: clamp(28px, 3vw, 96px)`) instead of centering it.
+- **Compute the fixed-TOC breakpoint, do not guess it.** With the content column left-aligned at margin `M` and width `0.75V`, and a TOC at `right: R; width: T`, the content's right edge is `M + 0.75V` and the TOC's left edge is `V - R - T`. Clearance requires `M + 0.75V + gap ≤ V - R - T`; with `M = clamp(28px, 3vw, 96px)`, `R = 24`, `T = 240`, and a ~10px gap, the binding constraint `0.03V + 10 ≤ 0.25V - 264` gives `V ≥ ~1245` — hence `min-width: 1280px`. Verify the arithmetic at the breakpoint and at common widths (1440/1920/2560) before delivery.
 - On narrow screens, return the TOC to document flow and collapse multi-column layouts to one column.
 - Long API examples, event streams, and tool loops are vertical. Each provider receives a full-width row.
 - Tables may overflow horizontally on small screens; do not crush columns until text becomes unreadable.
@@ -158,6 +158,15 @@ for m in re.finditer(r'<pre><code[^>]*>([\s\S]*?)</code></pre>', src):
     i = body.find('{')
     if i >= 0:
         json.loads(body[i:])           # HTTP headers may precede the JSON body
-markers = set(re.findall(r'<marker id="([^"]+)"', src))
+markers = set(re.findall(r'<marker[^>]*id="([^"]+)"', src))
 assert not set(re.findall(r'marker-end="url\(#([^)]+)\)"', src)) - markers
 ```
+
+**Normalize a hosted page before validating it.** A report re-downloaded from a library page node is not the file you uploaded: the platform injects a `data-page-node-id="..."` attribute into most elements and a `<!--pnid:xxx-->` comment before every text run. Those break the naive patterns above — `<pre><code[^>]*>` matches nothing because the tags carry attributes, and `<marker id="` misses every marker — producing false "0 code blocks" and "missing arrowhead marker" reports. Strip the injections into a clean copy first, and validate that:
+
+```python
+clean = re.sub(r'\s*data-page-node-id="[^"]*"', '', src)
+clean = re.sub(r'<!--pnid:[^>]*-->', '', clean)
+```
+
+Tell every reviewer subagent to ignore those comments too, and to measure SVG text width from the visible characters only.

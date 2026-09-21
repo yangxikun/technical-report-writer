@@ -26,6 +26,38 @@ in one line. Do not rewrite the report and do not propose full replacement marku
 
 Do not ask the reviewer to "check everything and fix what it finds" — that pushes judgment onto an agent without context and produces generic, low-signal output.
 
+## Per-Diagram Reviewer (mandatory, one subagent per SVG)
+
+Every generated SVG diagram gets its own forked `Explore`-type subagent, scoped to exactly that one diagram. Run all diagram reviewers in parallel, after the mechanical script passes. Never batch two diagrams into one reviewer and never fold diagram review into the whole-report pass — a reviewer reading prose skims geometry.
+
+### Per-Diagram Brief Template
+
+```
+File: <absolute path to the report HTML>
+Scope: ONLY the SVG inside the <figure> at lines <A>–<B> — the diagram answering
+  "<named question>". Do not review the rest of the report.
+Standards: /Users/<user>/.workbuddy/skills/technical-report-writer/references/review-checklist.md
+           ("What The Diagram Reviewer Checks" below) and diagram-guide.md
+Legend and color semantics: <e.g. green = write path, blue = read path, amber = dynamic
+  content, red = invalidation; one meaning per color>
+Established choices — do NOT flag these: <e.g. two-line labels at font-size 11 in the
+  left label column are intentional>
+
+Run the checks in "What The Diagram Reviewer Checks". Report in under 200 words as a
+flat list: SEVERITY | element/coordinates | what is wrong | why it matters. Use
+BLOCKER / SHOULD-FIX / NITPICK. Read-only: do not edit any file, do not propose
+replacement markup.
+```
+
+### What The Diagram Reviewer Checks
+
+- **Text–shape overlap, computed not eyeballed**: estimate every `<text>` width as `CJK chars × font-size + latin chars × 0.55 × font-size`; from its `x` and `text-anchor` derive the rendered span; check the span against the bounds of every `rect`, `line`, and neighboring `text` at the same vertical band. A side-column label that runs under a content box is the recurring defect — check every line of a multi-line label individually.
+- **viewBox bounds**: no text span, connector, or marker extends past the viewBox edge or is clipped by it.
+- **Marker pairing**: every line with `marker-end` references a defined marker id, and the marker's fill matches its line's stroke color. Lines declared in the legend as arrows must actually draw arrowheads.
+- **Legend ↔ drawing consistency**: every swatch in the legend appears in the drawing with the same meaning; no color carries two meanings; semantic colors match the report's palette rules.
+- **Prose consistency**: diagram labels use the report's terminology, numbers in the diagram (prices, TTLs, limits) match the surrounding prose and tables, and the caption states what the diagram actually shows.
+- **Position semantics**: when an element's *position* encodes mechanism semantics (a breakpoint line at a block boundary, an order of layers, a before/after split), verify the position against the prose's mechanism description element by element — not just colors and labels. Recurring defect: a marker drawn at the "stable-looking" boundary while the prose says the mechanism places it elsewhere (e.g. an implicit breakpoint drawn before the dynamic block it actually follows). Read the relevant prose sections and check every positioned marker against them.
+
 ## What The Reviewer Checks
 
 ### 1. Mechanical (run the validation script from html-style-guide.md)
@@ -68,7 +100,8 @@ Source-level checks miss rendered defects. The reviewer should look at the actua
 - arrowheads whose color does not match their line, or lines declared in the legend but drawn without arrowheads;
 - **collinear overlapping edges**: a request line and its response line drawn between the same two nodes in the same color coincide into one stroke, silently falsifying a "solid = request, dashed = response" legend. Offset the pair and give them distinct colors.
 - clipped SVG labels or connectors at desktop and mobile widths, and labels sitting on top of connectors;
-- **fixed-TOC overlap**: compute it rather than eyeball it. With a `max-width: W` centered column and a `position: fixed; right: R; width: T` TOC, the breakpoint must satisfy `V/2 + W/2 < V - R - T`, i.e. `V > W + 2R + 2T`. A 860px column with `right: 24px` and a 230px TOC needs roughly 1400px, so a 1280px breakpoint overlaps.
+- **SVG text overlapping shapes**: compute it, do not eyeball it. Estimate each `<text>` width as `CJK chars × font-size + latin chars × 0.55 × font-size`, add the text's `x` (or subtract for `text-anchor="middle"/"end"`), and check the resulting span against the bounds of every `rect`, `line`, and neighboring `text` it could touch. Multi-line labels in a side column must each fit the column — one long line that slips under a content box is the recurring defect.
+- **fixed-TOC overlap**: compute it rather than eyeball it. Established layout is a 75%-of-viewport content column, left-aligned on wide screens with `margin-left: M` and a `position: fixed; right: R; width: T` TOC: clearance requires `M + 0.75V + gap < V - R - T`. With `M = clamp(28px, 3vw, 96px)`, `R = 24`, `T = 240`, gap ≈ 10px, the breakpoint resolves to `min-width: 1280px`. Verify the arithmetic at the breakpoint and at 1440/1920/2560.
 - text overlapping or hidden under the fixed TOC;
 - callouts that are visually indistinguishable from each other;
 - tables crushed past readability at narrow widths.
@@ -99,6 +132,6 @@ When you do run a second pass, brief it as *verification*: list each fix you app
 
 ## When To Skip The Review Pass
 
-The pass is required for a new report, a major rewrite, and any change that adds or removes a chapter, restructures layout, or rewrites CSS or payloads in bulk.
+The pass is required for a new report, a major rewrite, and any change that adds or removes a chapter, restructures layout, or rewrites CSS or payloads in bulk. Independently of that, the per-diagram reviewer is required whenever any SVG was created or modified this round — even on an otherwise minor revision.
 
-It is not required for a single-word fix, a one-line copy edit, or a change the user is watching in real time and will judge themselves. Run the mechanical script regardless — it costs seconds.
+It is not required for a single-word fix, a one-line copy edit, or a change the user is watching in real time and will judge themselves — provided no SVG was touched. Run the mechanical script regardless — it costs seconds.

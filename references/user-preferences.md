@@ -30,7 +30,9 @@ These preferences were confirmed through iterative edits. Apply them when produc
 
 ## Information Architecture
 
-- Use a fixed right-side TOC, vertically centered on wide screens.
+- Content column width is 75% of the viewport (`.shell { width: 75% }`), not a fixed pixel max-width; do not add `max-width` caps to `.subtitle` / `.lead` or other prose blocks, as they would silently defeat the 75% directive.
+- On wide screens (≥1280px) keep the fixed right-side TOC (240px wide, at `right: 24px`, vertically centered via `top: 50%` + `translateY(-50%)`) and left-align the content column (`margin-left: clamp(28px, 3vw, 96px)`) instead of centering it — a centered 75% column leaves only 12.5vw per side, which collides with the TOC below ~2100px viewport width. Clearance invariant: content right edge = margin-left + 75vw must stay at least ~10px left of the TOC left edge (100vw − 264px).
+- On narrow screens (≤850px) fall back to full width (`width: auto`), never 75%.
 - Support secondary TOC entries for meaningful subsections.
 - TOC text must match destination headings exactly.
 - Keep the document focused. Remove chapters that do not help the requested decision.
