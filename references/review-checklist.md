@@ -58,6 +58,72 @@ replacement markup.
 - **Prose consistency**: diagram labels use the report's terminology, numbers in the diagram (prices, TTLs, limits) match the surrounding prose and tables, and the caption states what the diagram actually shows.
 - **Position semantics**: when an element's *position* encodes mechanism semantics (a breakpoint line at a block boundary, an order of layers, a before/after split), verify the position against the prose's mechanism description element by element — not just colors and labels. Recurring defect: a marker drawn at the "stable-looking" boundary while the prose says the mechanism places it elsewhere (e.g. an implicit breakpoint drawn before the dynamic block it actually follows). Read the relevant prose sections and check every positioned marker against them.
 
+## Readability Reviewer (novice reader, one subagent for the whole report)
+
+The expert reviewers above verify correctness. This reviewer verifies **comprehensibility** by deliberately lacking expert context. Run it after the whole-report review fixes land, so the text is stable.
+
+Why a separate pass: the author and the expert reviewer share background knowledge and unconsciously fill gaps ("obviously X means Y"). A reader with only undergraduate fundamentals cannot, and that is where undefined terms, skipped steps, and unexplained examples surface.
+
+### Independence Requirements
+
+This reviewer must be a **standalone subagent**, not the main agent and not a fork:
+
+- Launch it as a fresh Task invocation (`Explore` type, read-only) whose only inputs are the brief below. It must not inherit the conversation, the author's drafts, the research notes, or any prior reviewer's findings.
+- One novice reviewer per review round. Never reuse an expert, per-diagram, or earlier novice subagent: their context already contains the answers. A verification round gets a **new** subagent.
+- The main agent must not pre-answer, hint at, or summarize the report's content in the brief, and must not "simulate" the novice itself if the subagent is unavailable. In that case record the readability review as **not performed** in the delivery message.
+- Do not run it in parallel with fixes that are still editing the report; the subagent must read the final stable text.
+
+### Readability Brief Template
+
+Keep the brief minimal. Do **not** include the conversation, the author's intent, the decision's backstory, or the other reviewers' findings — any of these leak the context the persona must not have.
+
+```
+File: <absolute path to the HTML report>
+
+Role: You are a recent undergraduate graduate (computer-related major). You know course-level
+  programming, data structures, networking, databases, HTTP and JSON. You have NO industry
+  experience, NO prior knowledge of the products, protocols, frameworks, or internal jargon
+  this report discusses, and nobody to ask. Your manager asked you to read this report and
+  then explain its recommendation to the team.
+
+Task: Read the ENTIRE report once, top to bottom, in page order — body text, tables, captions,
+  code blocks and their comments, and text labels inside SVG diagrams. Do not skip sections
+  and do not use web search or outside knowledge to fill gaps. If you can only follow
+  something by guessing, treat it as not understood.
+
+Output (under 400 words, at most 15 questions, most important first), in your own voice as
+  the novice. One line each:
+  <location: section heading or line> | <your question, phrased as a real question> | <gap type>
+  Gap types: UNDEFINED-TERM, MISSING-STEP, UNCLEAR-REFERENT, UNEXPLAINED-WHY,
+  UNEXPLAINED-EXAMPLE, UNSUPPORTED-LEAP, NO-BIG-PICTURE.
+  Then add two lines:
+  - Where you first felt lost: <location + one sentence>
+  - Confidence you could explain the recommendation to a teammate: <0-100%> and the main reason.
+  Read-only: do not edit any file, do not propose rewritten text, do not comment on visual
+  design or factual accuracy.
+```
+
+### What Counts As A Question
+
+- **UNDEFINED-TERM**: a term, acronym, field name, or product name used before (or without) being explained. Check first use only; later uses are fine.
+- **MISSING-STEP**: the text jumps from A to C; a procedure, derivation, or data transformation skips the middle.
+- **UNCLEAR-REFERENT**: "it", "this", "该方案", "上述机制" where more than one candidate exists.
+- **UNEXPLAINED-WHY**: a design choice, default, or recommendation stated without a reason the novice can follow.
+- **UNEXPLAINED-EXAMPLE**: a JSON payload, event stream, code block, or diagram shown without saying what to look at and what it demonstrates.
+- **UNSUPPORTED-LEAP**: a conclusion or trade-off asserted before the evidence appears, or without visible reasoning.
+- **NO-BIG-PICTURE**: the reader loses track of why the current section exists or how it connects to the decision.
+
+### Author Triage Of Questions
+
+| Situation | Action |
+|---|---|
+| A target reader would plausibly ask it | Answer **in the report**: one-sentence definition at first use (or a short glossary when five or more terms need it), insert the missing step, replace the vague pronoun with its noun, add a "because ..." sentence, annotate the example field by field, add a one-line roadmap at the section start |
+| Same question appears several times | Fix the root cause once (usually a missing early definition or concept section), not each symptom |
+| Below the report's declared audience, or off-topic | Skip; list it with a reason in the delivery message |
+| Answer would require removing precision | Keep the precision and add the explanation beside it; do not turn the report into a tutorial |
+
+After fixing, re-run the mechanical script (inserted text can break anchors, TOC, or tag balance). Run a verification pass with a **fresh** novice subagent when several `MISSING-STEP`, `NO-BIG-PICTURE`, or `UNSUPPORTED-LEAP` questions were fixed: pass it the earlier question list and the changed regions, and ask whether each question is now answerable from the page and whether the fixes created new confusion. A single added definition does not need a second pass.
+
 ## What The Reviewer Checks
 
 ### 1. Mechanical (run the validation script from html-style-guide.md)
@@ -133,5 +199,7 @@ When you do run a second pass, brief it as *verification*: list each fix you app
 ## When To Skip The Review Pass
 
 The pass is required for a new report, a major rewrite, and any change that adds or removes a chapter, restructures layout, or rewrites CSS or payloads in bulk. Independently of that, the per-diagram reviewer is required whenever any SVG was created or modified this round — even on an otherwise minor revision.
+
+The readability (novice reader) pass is required for a new report, a major rewrite, or any chapter that is added or substantially rewritten.
 
 It is not required for a single-word fix, a one-line copy edit, or a change the user is watching in real time and will judge themselves — provided no SVG was touched. Run the mechanical script regardless — it costs seconds.

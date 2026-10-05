@@ -162,6 +162,10 @@ markers = set(re.findall(r'<marker[^>]*id="([^"]+)"', src))
 assert not set(re.findall(r'marker-end="url\(#([^)]+)\)"', src)) - markers
 ```
 
+**The JSON assertion fires on any code block containing a brace, not just `language-json` ones.** `body.find('{')` does not check the language class, so a `plaintext` struct definition, a C-like pseudo-code snippet, or a Prometheus exposition line with `{label="..."}` will all be fed to `json.loads` and fail the run. Two ways out, both acceptable: gate the check on `language-json` in the class attribute, or keep non-JSON blocks brace-free (render config pseudo-code as YAML, and strip label sets from metrics samples). Prefer the brace-free option when the payload is illustrative — it keeps the script's one-line invariant intact and the block reads the same.
+
+**Match every arrowhead to its line's exact hex, not just its colour family.** The amber family in the semantic palette has two members — `#D48806` (strong, used for box strokes and left rules) and `#c9862b` (lines) — so a marker filled `#D48806` on a `#c9862b` stroke is a real mismatch a per-diagram reviewer will flag, even though both are "amber". Define the marker with the same hex string the `stroke` attribute uses.
+
 **Normalize a hosted page before validating it.** A report re-downloaded from a library page node is not the file you uploaded: the platform injects a `data-page-node-id="..."` attribute into most elements and a `<!--pnid:xxx-->` comment before every text run. Those break the naive patterns above — `<pre><code[^>]*>` matches nothing because the tags carry attributes, and `<marker id="` misses every marker — producing false "0 code blocks" and "missing arrowhead marker" reports. Strip the injections into a clean copy first, and validate that:
 
 ```python

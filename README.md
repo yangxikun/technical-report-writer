@@ -27,6 +27,7 @@ This skill encodes a working method for that outcome:
 - **Technical diagrams** — architecture, data-flow, workflow/sequence, state, and comparison diagrams, each required to answer one named question.
 - **A restrained HTML design system** — white reading surface, fixed two-level right-side TOC, responsive layout, and a validated anchor structure.
 - **A verification checklist** — tag balance, anchor resolution, TOC-to-heading matching, diagram readability, and responsive behavior at four widths.
+- **A novice-reader readability review** — an independent, fresh-context read-only subagent (never the main agent or a fork) plays a recent graduate with no domain background, reads the whole report front to back, and raises questions (undefined terms, skipped steps, unclear references, unexplained examples). The author answers them inside the report.
 
 ## Installation
 
@@ -81,6 +82,7 @@ references/
   html-style-guide.md                 # palette, layout, components, responsive checks
   diagram-guide.md                    # diagram routing, construction rules, embedding, verification
   user-preferences.md                 # confirmed house style for this user
+  review-checklist.md                 # expert, per-diagram, and novice-reader review briefs and triage rules
 ```
 
 ## How It Works
@@ -102,6 +104,10 @@ The report *is* the first screen — not a landing page. Long examples stack ver
 ### 4. Verify before delivery
 
 Anchors resolve, TOC labels match headings exactly, tags balance, diagrams are readable at desktop and mobile widths, and no node or connector is clipped.
+
+### 5. Readability review
+
+After expert review, a novice-persona subagent reads the entire report and returns questions rather than fixes. Each question is answered in the report (definition at first use, missing step, clearer referent, annotated example) or skipped with a stated reason. Structural gaps trigger a verification re-read by a fresh novice subagent.
 
 ## Design System
 
@@ -142,6 +148,7 @@ A report is complete only when a reader can answer:
 5. What must change in production code, state, testing, operations, and governance?
 6. What can fail, and how will the team verify the migration?
 7. Which diagram shows the critical structure or flow — and can the reader explain it without guessing what an arrow means?
+8. Can a recent graduate with no domain background read it straight through without hitting an undefined term, a skipped step, or an unexplained example?
 
 ## Requirements
 

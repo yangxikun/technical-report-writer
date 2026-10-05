@@ -16,6 +16,7 @@ Create a report that helps the reader make and implement a technical decision. D
 - Read [references/diagram-guide.md](references/diagram-guide.md) when the subject includes system structure, data movement, multi-step execution, lifecycle, deployment, or another relationship that a diagram would explain better than prose.
 - Read [references/user-preferences.md](references/user-preferences.md) when the report is for this user or when matching the established house style matters.
 - Read [references/review-checklist.md](references/review-checklist.md) before the review pass — for a new report, a major rewrite, or any revision that adds or removes a chapter, reworks layout, or rewrites payloads in bulk.
+- Read the "Readability Reviewer" section of [references/review-checklist.md](references/review-checklist.md) when running the novice-reader pass.
 - Use [assets/technical-report-template.html](assets/technical-report-template.html) as a visual starting point when no stronger existing template or design system is supplied. Replace every `{{TOKEN}}`, remove unused sections, and adapt the hierarchy to the actual decision; never deliver template markers.
 
 ## Working Method
@@ -36,7 +37,8 @@ Create a report that helps the reader make and implement a technical decision. D
 7. End important sections with a reusable principle, decision rule, or warning. Avoid slogans unsupported by the section.
 8. Self-validate: run the mechanical validation script from [references/html-style-guide.md](references/html-style-guide.md) (tag balance, anchor resolution, JSON parse, code-block whitespace, SVG marker references) and fix what it catches.
 9. Run the review pass described below — including **one forked reviewer subagent per SVG diagram** — triage the findings, and fix what matters.
-10. Deliver: link the artifact and state what changed. If the report lives in a remote page node, re-import to the same node so the link stays stable.
+10. Run the **Readability Review** described below: an **independent, fresh-context subagent** (not a fork, not the main agent) plays a recent undergraduate graduate, reads the whole report front to back, and raises every question it cannot answer from the page. Resolve each question in the report, then re-run the mechanical script.
+11. Deliver: link the artifact and state what changed. If the report lives in a remote page node, re-import to the same node so the link stays stable.
 
 ## Review Pass
 
@@ -60,6 +62,24 @@ Every generated SVG diagram gets its own forked review subagent. Diagram defects
 - Re-run the mechanical script after fixing. A second review pass is warranted only for structural fixes, not typos.
 
 Skip the whole-report subagent for a single-word fix or a change the user is watching in real time; still run the mechanical script, which costs seconds. The per-diagram subagent is skippable only when the change provably does not touch any SVG.
+
+## Readability Review (Novice Reader)
+
+The expert review pass checks correctness; it cannot check whether the report is understandable, because reviewers and authors share the same background knowledge and silently fill gaps. This step deliberately removes that background.
+
+- **Must run as an independent subagent.** Never perform this review yourself, never role-play the novice in the main agent, and never fold it into the whole-report or per-diagram reviewers. The main agent has written and reviewed the report, so it cannot unlearn what it knows; only a separate agent starting from an empty context can read the page as a stranger would.
+  - Spawn it as a **new, standalone** read-only `Explore`-type subagent through the Task tool (a fresh invocation with its own context). Do not fork the current conversation or inherit its history, and do not reuse a subagent that already reviewed this report (the expert, diagram, or an earlier novice reviewer).
+  - If subagents are unavailable in the active session, say so explicitly at delivery and mark the readability review as **not performed**; do not substitute a self-review and claim it was done.
+  - The main agent's only role is to write the brief, launch the subagent, and triage what comes back.
+- Run it **after** the whole-report review fixes are applied, so the content is stable. Use the brief in [references/review-checklist.md](references/review-checklist.md) ("Readability Reviewer"). Give it only the file path and the persona — not the conversation, not your intended meaning.
+- Persona: a recent undergraduate graduate with basic computer-science fundamentals (programming, HTTP/JSON, databases, networks at course level) but no industry experience, no familiarity with the report's specific products, protocols, or internal jargon, and no one to ask. The reviewer must read the **entire** report linearly, in page order, including captions, tables, code comments, and SVG labels, and must not use outside knowledge or tools to fill gaps. Anything it can only understand by guessing counts as unclear.
+- Output: a flat list of **questions** in the persona's own voice, not fixes — `location | the question | gap type`. Gap types: `UNDEFINED-TERM`, `MISSING-STEP`, `UNCLEAR-REFERENT` ("it", "this", "上述方案" with no clear target), `UNEXPLAINED-WHY`, `UNEXPLAINED-EXAMPLE` (payload/field/diagram not walked through), `UNSUPPORTED-LEAP` (conclusion without visible reasoning), `NO-BIG-PICTURE` (lost track of where the section fits). Also report in one line where the reader first felt lost and the overall confidence (0–100%) that they could explain the recommendation to a teammate.
+- Triage each question as the author:
+  - **Answer it in the report** when a target reader would plausibly ask it: define the term at first use (one sentence, or a short glossary for 5+ terms), add the missing step, replace the vague pronoun, add a "why" sentence, annotate the example field by field, or add a one-line roadmap at the section start.
+  - **Skip with a reason** only when the question is below the report's declared audience or off-topic. Note skipped questions at delivery.
+  - Fix by adding explanation, not by removing precision or diluting the technical content. Do not turn the report into a tutorial.
+- If more than a handful of questions were structural (`MISSING-STEP`, `NO-BIG-PICTURE`, `UNSUPPORTED-LEAP`), run a verification pass with a **fresh** novice subagent: give it the list of earlier questions plus the changed regions and ask whether each is now answerable from the page and whether the fixes introduced new confusion. Typo-level and single-term fixes do not need a second pass.
+- Skip only for a single-word fix or a change the user is watching in real time. Otherwise it is required for a new report, a major rewrite, or any chapter added or substantially rewritten.
 
 Revisions deserve the same scrutiny as first drafts. Most defects in a mature report are regressions from editing — stale chapter numbers after a deletion, a stranded duplicate paragraph after a block replacement, a style rule applied to one instance out of nine, a formatter run twice over the same block.
 
@@ -100,10 +120,12 @@ The report is complete when a reader can answer:
 - What must change in production code, state, testing, operations, and governance?
 - What can fail, and how will the team verify the migration or implementation?
 - Which diagram shows the critical structure or flow, and can the reader explain it without guessing what an arrow means?
+- Could a recent graduate with no domain background read it straight through without hitting an undefined term, a skipped step, or an unexplained example?
 
 And mechanically:
 
 - Does the validation script pass — tags balanced, anchors resolving, every JSON block parsing, no stray whitespace rows in code blocks, every arrowhead marker defined?
 - Did a reviewer subagent see the changed regions, was every BLOCKER resolved — and did each SVG diagram get its own forked review subagent with computed (not eyeballed) geometry?
+- Did an independent, fresh-context novice-reader subagent (not the main agent, not a forked or reused reviewer) read the whole report, and was every question it raised either answered in the report or explicitly skipped with a reason?
 
 If the report only restates documentation or lists features, revise it before delivery.
